@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog;
+using SiloTowers.Helper;
+using System.IO;
 
 namespace SiloTowers
 {
@@ -21,6 +24,16 @@ namespace SiloTowers
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                })
+               .UseContentRoot(Directory.GetCurrentDirectory())
+               .ConfigureAppConfiguration((hostingContext, config) =>
+               {
+                    config.AddJsonFile("appsettings.json", false, true);
+               })
+               .UseSerilog((_, _) =>
+               {
+                   LoggerHelper.ConfigureLogging();
+               })
+            ;
     }
 }
