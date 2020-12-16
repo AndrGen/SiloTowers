@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace B2BSales.Interfaces.DB {
+namespace SiloTower.Interfaces.DB {
     /// <summary>
     /// Интерфейс для единицы работы.
     /// </summary>

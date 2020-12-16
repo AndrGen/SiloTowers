@@ -1,6 +1,6 @@
 ﻿using System;
-using B2BSales.Interfaces.DB;
 using Microsoft.EntityFrameworkCore;
+using SiloTower.Interfaces.DB;
 
 namespace SiloTower.Infrastructure.DB
 {

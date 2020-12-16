@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace B2BSales.Interfaces.DB {
+namespace SiloTower.Interfaces.DB {
     /// <summary>
     /// Фабрика единиц работ.
     /// </summary>

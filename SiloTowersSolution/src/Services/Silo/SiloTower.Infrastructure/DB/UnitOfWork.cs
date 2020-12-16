@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
-using B2BSales.Interfaces.DB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using SiloTower.Interfaces.DB;
 
 namespace SiloTower.Infrastructure.DB
 {

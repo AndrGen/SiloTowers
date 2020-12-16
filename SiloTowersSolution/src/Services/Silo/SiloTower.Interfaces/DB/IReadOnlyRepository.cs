@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace B2BSales.Interfaces.DB{
+namespace SiloTower.Interfaces.DB{
     /// <summary>
     /// Интерфейс репозитория только для чтения.
     /// </summary>

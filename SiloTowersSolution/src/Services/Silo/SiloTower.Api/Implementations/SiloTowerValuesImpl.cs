@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using B2BSales.Interfaces.DB;
+
 using Microsoft.EntityFrameworkCore;
 using SiloTower.Domain.Silo;
 using SiloTower.Infrastructure.UoW;
+using SiloTower.Interfaces.DB;
 using SiloTower.Interfaces.Silo;
 
 namespace SiloTower.Api.Implementations
@@ -28,8 +30,8 @@ namespace SiloTower.Api.Implementations
         }
         public async Task<IList<SiloIndicators>> GetSiloIndicators()
         {
-            using var unitOfWork = _factory.Create<TowerUnitOfWork>();
-            var result = await unitOfWork.TestRepository.Entities.Include(l => l.Level).Include(w => w.Weight).Where(s => s.LevelId != null && s.WeightId != null).ToListAsync();
+            using var unitOfWork = _factory.Create<SelectTowersUnitOfWork>();
+            var result = await unitOfWork.TowerRepository.Entities.Include(l => l.Level).Include(w => w.Weight).Where(s => s.LevelId != null && s.WeightId != null).ToListAsync();
 
             IList<SiloIndicators> siloIndicators = result.Select(
                 s => new SiloIndicators()
@@ -43,6 +45,7 @@ namespace SiloTower.Api.Implementations
 
         public async Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest)
         {
+            using var unitOfWork = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
             throw new NotImplementedException();
         }
     }

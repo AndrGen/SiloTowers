@@ -1,4 +1,4 @@
-﻿namespace B2BSales.Interfaces.DB
+﻿namespace SiloTower.Interfaces.DB
 {
     public interface IRepository<T>: IReadOnlyRepository<T> where T : class
     {
