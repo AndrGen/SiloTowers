@@ -10,7 +10,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\..\SeedWork\Common\Common.csproj" />
 	  <ProjectReference Include="..\SiloTower.Domain\SiloTower.Domain.csproj" />
+	  <ProjectReference Include="..\SiloTower.Interfaces\SiloTower.Interfaces.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="DB\DbConnection.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 	
 </Project>

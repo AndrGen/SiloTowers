@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "DevConnection": "Data Source=DESKTOP-CIISE0L;Initial Catalog=SiloTower;Persist Security Info=True;User ID=SiloTower;Password={0}"
+  },
+  "Pass": "U2lsb1Rvd2VyMQ=="
+}

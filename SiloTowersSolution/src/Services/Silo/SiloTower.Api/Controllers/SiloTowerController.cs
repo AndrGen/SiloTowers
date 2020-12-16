@@ -26,20 +26,26 @@ namespace SiloTower.Api.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IList<SiloIndicators>>> GetSiloIndicators()
         {
             try
             {
                 _logger.Debug("GetSiloIndicators start");
-                return Ok(await _siloTowerValues.GetSiloIndicators());
+                var res = await _siloTowerValues.GetSiloIndicators();
+                if (res is not null && res.Count > 0)
+                    return Ok(res);
+                return NotFound("Значений не найдено");
             }
-            catch (InvalidOperationException ioe)
+            catch (Exception ex) when
+            (ex is ArgumentNullException ||
+             ex is InvalidOperationException)
             {
-                _logger.Error("GetSiloIndicators ", ioe, ioe.Message);
+                _logger.Error("GetSiloIndicators ", ex, ex.Message);
                 return Problem(
                     statusCode: (int)HttpStatusCode.InternalServerError,
-                    detail: ioe.StackTrace,
-                    title: ioe.Message);
+                    detail: ex.StackTrace,
+                    title: ex.Message);
             }
         }
     }

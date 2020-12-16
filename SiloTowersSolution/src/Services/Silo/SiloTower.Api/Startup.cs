@@ -1,11 +1,14 @@
+using B2BSales.Interfaces.DB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SiloTower.Api.Implementations;
+using SiloTower.Infrastructure.DB;
 using SiloTower.Interfaces.Silo;
 
 [assembly: ApiController]
@@ -35,6 +38,13 @@ namespace SiloTower.Api
             if (_env.IsDevelopment())
             {
                 services.AddTransient<ISiloTowerValues, SiloTowerValuesImpl>();
+                services.AddDbContext<SilotowerContext>(
+                 options =>
+                 {
+                     options.UseSqlServer(new DbConnectionString().GetDbConnectionString());
+                 },
+                 ServiceLifetime.Singleton);
+                services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             }
 
             services.AddHealthChecks();
@@ -49,10 +59,10 @@ namespace SiloTower.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SiloTowers v1"));
-            
+
             app.UseExceptionHandler("/error");
 
             app.UseRouting();
