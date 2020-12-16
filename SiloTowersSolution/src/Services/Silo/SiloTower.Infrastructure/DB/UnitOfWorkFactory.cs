@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SiloTower.Interfaces.DB;
+using System;
 using System.Data;
-using B2BSales.Interfaces.DB;
 
 namespace SiloTower.Infrastructure.DB
 {

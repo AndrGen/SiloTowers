@@ -1,4 +1,3 @@
-using B2BSales.Interfaces.DB;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SiloTower.Api.Implementations;
 using SiloTower.Infrastructure.DB;
+using SiloTower.Interfaces.DB;
 using SiloTower.Interfaces.Silo;
 
 [assembly: ApiController]

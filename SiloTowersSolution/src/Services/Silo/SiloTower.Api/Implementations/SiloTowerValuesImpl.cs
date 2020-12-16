@@ -45,8 +45,19 @@ namespace SiloTower.Api.Implementations
 
         public async Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest)
         {
-            using var unitOfWork = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
-            throw new NotImplementedException();
+            IndicatorUnitOfWork unitOfWork = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
+            try
+            {
+
+
+
+                await unitOfWork.SaveCommitAsync();
+                return await Task.FromResult(true);
+            }
+            finally
+            {
+                unitOfWork.Dispose();
+            }
         }
     }
 }
