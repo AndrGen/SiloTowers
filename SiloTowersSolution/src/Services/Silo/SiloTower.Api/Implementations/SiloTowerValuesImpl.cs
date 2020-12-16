@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using SiloTower.Domain.DB;
 using SiloTower.Domain.Silo;
 using SiloTower.Infrastructure.UoW;
 using SiloTower.Interfaces.DB;
@@ -51,12 +52,36 @@ namespace SiloTower.Api.Implementations
                 .Include(t => t.TowerLevel)
                 .Where(l => l.Type == (short)SiloIndicatorType.Level && l.TowerLevel.FirstOrDefault().Id == saveSiloIndicatorRequest.TowerId)
                 .OrderByDescending(o => o.Date)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
             var resWeight = await unitOfWork.IndicatorValuesRepository.Entities
                 .Include(t => t.TowerWeight)
                 .Where(l => l.Type == (short)SiloIndicatorType.Weight && l.TowerWeight.FirstOrDefault().Id == saveSiloIndicatorRequest.TowerId)
                 .OrderByDescending(o => o.Date)
-                .ToListAsync();
+                .FirstOrDefaultAsync();
+
+            IndicatorValues indicatorLevel = new IndicatorValues 
+            {
+                Value = saveSiloIndicatorRequest.LevelValue,
+                Type = (short)SiloIndicatorType.Level,
+                Title = resLevel.Title,
+                MaxValue = resLevel.MaxValue,
+                MinValue = resLevel.MinValue,
+                Date = DateTime.Now,
+                TowerLevel = resLevel.TowerLevel
+            };
+            unitOfWork.IndicatorValuesRepository.Add(indicatorLevel);
+
+            IndicatorValues indicatorWeight = new IndicatorValues
+            {
+                Value = saveSiloIndicatorRequest.WeightValue,
+                Type = (short)SiloIndicatorType.Weight,
+                Title = resWeight.Title,
+                MaxValue = resWeight.MaxValue,
+                MinValue = resWeight.MinValue,
+                Date = DateTime.Now,
+                TowerWeight = resWeight.TowerWeight
+            };
+            unitOfWork.IndicatorValuesRepository.Add(indicatorWeight);
 
             await unitOfWork.SaveCommitAsync();
             return await Task.FromResult(true);
