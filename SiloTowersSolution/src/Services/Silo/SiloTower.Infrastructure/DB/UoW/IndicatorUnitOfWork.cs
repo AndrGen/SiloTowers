@@ -13,12 +13,14 @@ namespace SiloTower.Infrastructure.UoW
         #region Private fields
 
         private IRepository<IndicatorValues> indicatorValuesRepository;
+        private IRepository<Tower> towerRepository;
 
         #endregion
 
         #region Properties
 
         public IRepository<IndicatorValues> IndicatorValuesRepository => indicatorValuesRepository ??= new Repository<IndicatorValues>(dbContext);
+        public IRepository<Tower> TowerRepository => towerRepository ??= new Repository<Tower>(dbContext);
 
 
         #endregion

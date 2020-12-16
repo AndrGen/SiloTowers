@@ -59,31 +59,48 @@ namespace SiloTower.Api.Implementations
                 .OrderByDescending(o => o.Date)
                 .FirstOrDefaultAsync();
 
-            IndicatorValues indicatorLevel = new IndicatorValues 
+            if (resLevel is not null && resWeight is not null)
             {
-                Value = saveSiloIndicatorRequest.LevelValue,
-                Type = (short)SiloIndicatorType.Level,
-                Title = resLevel.Title,
-                MaxValue = resLevel.MaxValue,
-                MinValue = resLevel.MinValue,
-                Date = DateTime.Now,
-                TowerLevel = resLevel.TowerLevel
-            };
-            unitOfWork.IndicatorValuesRepository.Add(indicatorLevel);
+                IndicatorValues indicatorLevel = new IndicatorValues
+                {
+                    Value = saveSiloIndicatorRequest.LevelValue,
+                    Type = (short)SiloIndicatorType.Level,
+                    Title = resLevel.Title,
+                    MaxValue = resLevel.MaxValue,
+                    MinValue = resLevel.MinValue,
+                    Date = DateTime.Now,
+                };
+                unitOfWork.IndicatorValuesRepository.Add(indicatorLevel);
 
-            IndicatorValues indicatorWeight = new IndicatorValues
-            {
-                Value = saveSiloIndicatorRequest.WeightValue,
-                Type = (short)SiloIndicatorType.Weight,
-                Title = resWeight.Title,
-                MaxValue = resWeight.MaxValue,
-                MinValue = resWeight.MinValue,
-                Date = DateTime.Now,
-                TowerWeight = resWeight.TowerWeight
-            };
-            unitOfWork.IndicatorValuesRepository.Add(indicatorWeight);
+                IndicatorValues indicatorWeight = new IndicatorValues
+                {
+                    Value = saveSiloIndicatorRequest.WeightValue,
+                    Type = (short)SiloIndicatorType.Weight,
+                    Title = resWeight.Title,
+                    MaxValue = resWeight.MaxValue,
+                    MinValue = resWeight.MinValue,
+                    Date = DateTime.Now,
+                };
+                unitOfWork.IndicatorValuesRepository.Add(indicatorWeight);
 
-            await unitOfWork.SaveCommitAsync();
+                await unitOfWork.SaveCommitAsync();
+            }
+
+            using IndicatorUnitOfWork unitOfWorkTower = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
+            var tower = await unitOfWorkTower.TowerRepository.GetAsyncById(saveSiloIndicatorRequest.TowerId);
+            var weight = await unitOfWorkTower.IndicatorValuesRepository.Entities
+                .Where(l => l.Type == (short)SiloIndicatorType.Weight)
+                .OrderByDescending(o => o.Date)
+                .FirstOrDefaultAsync();
+            var level = await unitOfWorkTower.IndicatorValuesRepository.Entities
+                .Where(l => l.Type == (short)SiloIndicatorType.Level)
+                .OrderByDescending(o => o.Date)
+                .FirstOrDefaultAsync();
+            tower.LevelId = level.Id;
+            tower.WeightId = weight.Id;
+
+            await unitOfWorkTower.SaveCommitAsync();
+
             return await Task.FromResult(true);
         }
     }
