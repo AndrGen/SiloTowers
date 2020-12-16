@@ -1,4 +1,5 @@
 ﻿using Common.Helper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 namespace SiloTower.Api.Controllers
 {
     [Route("api")]
+    [Authorize]
     public class SiloTowerController : Controller
     {
         private readonly ILogger _logger = LoggerHelper.Logger;

@@ -1,15 +1,20 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SiloTower.Api.Implementations;
 using SiloTower.Infrastructure.DB;
 using SiloTower.Interfaces.DB;
 using SiloTower.Interfaces.Silo;
+using System;
 
 [assembly: ApiController]
 namespace SiloTower.Api
@@ -28,6 +33,9 @@ namespace SiloTower.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var identityUrl = Configuration.GetValue<string>("IdentityUrl");
+            var callBackUrl = Configuration.GetValue<string>("CallBackUrl");
+            var sessionCookieLifetime = Configuration.GetValue("SessionCookieLifetimeMinutes", 60);
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -44,12 +52,26 @@ namespace SiloTower.Api
                      options.UseSqlServer(new DbConnectionString().GetDbConnectionString());
                  },
                  ServiceLifetime.Singleton);
+                services.AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SilotowerContext>();
                 services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             }
 
             services.AddHealthChecks();
             services.AddMvc().AddNewtonsoftJson();
 
+            // Add Authentication services
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = identityUrl;
+                options.RequireHttpsMetadata = false;
+                options.Audience = "orders";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +89,7 @@ namespace SiloTower.Api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
