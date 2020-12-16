@@ -9,6 +9,8 @@ namespace SiloTower.Interfaces.Silo
 {
     public interface ISiloTowerValues
     {
-       public Task<IList<SiloIndicators>> GetSiloIndicators();
+        public Task<IList<SiloIndicators>> GetSiloIndicators();
+
+        public Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest);
     }
 }

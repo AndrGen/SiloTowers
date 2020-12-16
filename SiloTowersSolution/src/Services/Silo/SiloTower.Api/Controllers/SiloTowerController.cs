@@ -27,6 +27,7 @@ namespace SiloTower.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
         public async Task<ActionResult<IList<SiloIndicators>>> GetSiloIndicators()
         {
             try
@@ -42,6 +43,33 @@ namespace SiloTower.Api.Controllers
              ex is InvalidOperationException)
             {
                 _logger.Error("GetSiloIndicators ", ex, ex.Message);
+                return Problem(
+                    statusCode: (int)HttpStatusCode.InternalServerError,
+                    detail: ex.StackTrace,
+                    title: ex.Message);
+            }
+        }
+
+        [HttpPost("SaveIndicator")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        public async Task<ActionResult<bool>> SaveSiloIndicators([FromBody] SaveSiloIndicatorRequest saveSiloIndicatorRequest)
+        {
+            try
+            {
+                _logger.Debug("SaveSiloIndicators start");
+
+                if (await _siloTowerValues.SaveSiloIndicators(saveSiloIndicatorRequest))
+                    return NoContent();
+                return BadRequest("Не выполнено сохранение значений");
+            }
+            catch (Exception ex) when
+            (ex is ArgumentNullException ||
+             ex is InvalidOperationException)
+            {
+                _logger.Error("SaveSiloIndicators ", ex, ex.Message);
                 return Problem(
                     statusCode: (int)HttpStatusCode.InternalServerError,
                     detail: ex.StackTrace,

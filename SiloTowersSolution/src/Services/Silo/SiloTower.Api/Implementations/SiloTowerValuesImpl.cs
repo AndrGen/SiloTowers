@@ -63,5 +63,10 @@ namespace SiloTower.Api.Implementations
 
             return await Task.FromResult<IList<SiloIndicators>>(siloIndicators);
         }
+
+        public async Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
