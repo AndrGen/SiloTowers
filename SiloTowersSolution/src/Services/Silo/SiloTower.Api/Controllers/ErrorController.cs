@@ -9,7 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SiloTowerApi.Controllers
+namespace SiloTower.Api.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : Controller

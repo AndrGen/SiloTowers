@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SiloTowerApi.Controllers
+namespace SiloTower.Api.Controllers
 {
     [Route("")]
     public class TestController : Controller

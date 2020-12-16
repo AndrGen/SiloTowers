@@ -10,7 +10,7 @@ using Serilog;
 using Common.Helper;
 using System.IO;
 
-namespace SiloTowerApi
+namespace SiloTower.Api
 {
     public class Program
     {
