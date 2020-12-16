@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using SiloTowers.Helper;
+using SiloTowerApi.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SiloTowers.Controllers
+namespace SiloTowerApi.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : Controller

@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using SiloTowers.Helper;
+using SiloTowerApi.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SiloTowers.Controllers
+namespace SiloTowerApi.Controllers
 {
     [Route("")]
     public class TestController : Controller

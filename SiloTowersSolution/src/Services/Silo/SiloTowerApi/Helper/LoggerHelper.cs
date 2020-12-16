@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 
-namespace SiloTowers.Helper
+namespace SiloTowerApi.Helper
 {
     public static class LoggerHelper
     {

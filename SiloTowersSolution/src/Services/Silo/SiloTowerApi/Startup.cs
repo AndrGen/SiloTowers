@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 [assembly: ApiController]
-namespace SiloTowers
+namespace SiloTowerApi
 {
     public class Startup
     {
