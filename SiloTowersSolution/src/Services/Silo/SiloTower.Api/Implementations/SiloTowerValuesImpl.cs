@@ -29,37 +29,14 @@ namespace SiloTower.Api.Implementations
         public async Task<IList<SiloIndicators>> GetSiloIndicators()
         {
             using var unitOfWork = _factory.Create<TowerUnitOfWork>();
-            var result = await unitOfWork.TestRepository.Entities.Include(iv => iv.Indicator).ToListAsync();
+            var result = await unitOfWork.TestRepository.Entities.Include(l => l.Level).Include(w => w.Weight).Where(s => s.LevelId != null && s.WeightId != null).ToListAsync();
 
-            IList<SiloIndicators> siloIndicators = new List<SiloIndicators>();
-            foreach (var indicator in result)
-            {
-                var siloIndicator = new SiloIndicators();
-                if (indicator.Indicator.Type == (short)SiloIndicatorType.Weight)
-                    siloIndicator.AddWeight(indicator.TowerId,
-                        new Indicator(
-                               indicator.Indicator.Id.ToString(),
-                               indicator.Indicator.Title,
-                               indicator.Indicator.Value,
-                               indicator.Indicator.MinValue,
-                               indicator.Indicator.MaxValue
-                            )
-                        );
-                
-                if(indicator.Indicator.Type == (short)SiloIndicatorType.Level)
-                {
-                    siloIndicator.AddLevel(indicator.TowerId,
-                        new Indicator(
-                               indicator.Indicator.Id.ToString(),
-                               indicator.Indicator.Title,
-                               indicator.Indicator.Value,
-                               indicator.Indicator.MinValue,
-                               indicator.Indicator.MaxValue
-                            )
-                        );
-                }
-                siloIndicators.Add(siloIndicator);
-            }
+            IList<SiloIndicators> siloIndicators = result.Select(
+                s => new SiloIndicators()
+                     .AddId(s.Id)
+                     .AddLevel(new Indicator(s.Level.Id.ToString(), s.Level.Title, s.Level.Value, s.Level.MinValue, s.Level.MaxValue))
+                     .AddWeight(new Indicator(s.Weight.Id.ToString(), s.Weight.Title, s.Weight.Value, s.Weight.MinValue, s.Weight.MaxValue))
+                ).ToList();
 
             return await Task.FromResult<IList<SiloIndicators>>(siloIndicators);
         }

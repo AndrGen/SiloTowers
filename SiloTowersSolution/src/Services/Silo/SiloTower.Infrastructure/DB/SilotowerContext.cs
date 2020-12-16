@@ -22,14 +22,6 @@ namespace SiloTower.Infrastructure.DB
         public virtual DbSet<IndicatorValues> IndicatorValues { get; set; }
         public virtual DbSet<Tower> Tower { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "Cyrillic_General_CI_AS");
@@ -51,13 +43,13 @@ namespace SiloTower.Infrastructure.DB
 
             modelBuilder.Entity<Tower>(entity =>
             {
-                entity.HasIndex(e => e.IndicatorId, "IX_Indicator_id");
+                entity.HasOne(d => d.Level)
+                    .WithMany(p => p.TowerLevel)
+                    .HasForeignKey(d => d.LevelId);
 
-                entity.HasOne(d => d.Indicator)
-                    .WithMany(p => p.Tower)
-                    .HasForeignKey(d => d.IndicatorId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Tower_IndicatorValues");
+                entity.HasOne(d => d.Weight)
+                    .WithMany(p => p.TowerWeight)
+                    .HasForeignKey(d => d.WeightId);
             });
 
             OnModelCreatingPartial(modelBuilder);

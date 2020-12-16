@@ -9,9 +9,10 @@ namespace SiloTower.Domain.DB
     public partial class Tower
     {
         public int Id { get; set; }
-        public int TowerId { get; set; }
-        public int IndicatorId { get; set; }
+        public int? WeightId { get; set; }
+        public int? LevelId { get; set; }
 
-        public virtual IndicatorValues Indicator { get; set; }
+        public virtual IndicatorValues Level { get; set; }
+        public virtual IndicatorValues Weight { get; set; }
     }
 }

@@ -26,16 +26,22 @@ namespace SiloTower.Domain.Silo
         /// </summary>
         public Indicator Level { get; private set; }
 
-        public void AddWeight(int towerId, Indicator weight)
+        public SiloIndicators AddId(int towerId)
         {
             TowerId = towerId;
-            Weight = weight;
+            return this;
         }
 
-        public void AddLevel(int towerId, Indicator level)
+        public SiloIndicators AddWeight(Indicator weight)
         {
-            TowerId = towerId;
+            Weight = weight;
+            return this;
+        }
+
+        public SiloIndicators AddLevel(Indicator level)
+        {
             Level = level;
+            return this;
         }
     }
 }

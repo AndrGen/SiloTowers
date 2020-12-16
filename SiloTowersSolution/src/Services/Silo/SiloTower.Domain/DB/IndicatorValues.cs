@@ -10,7 +10,8 @@ namespace SiloTower.Domain.DB
     {
         public IndicatorValues()
         {
-            Tower = new HashSet<Tower>();
+            TowerLevel = new HashSet<Tower>();
+            TowerWeight = new HashSet<Tower>();
         }
 
         public int Id { get; set; }
@@ -18,9 +19,10 @@ namespace SiloTower.Domain.DB
         public decimal Value { get; set; }
         public decimal MinValue { get; set; }
         public decimal MaxValue { get; set; }
-        public short? Type { get; set; }
-        public DateTime? Date { get; set; }
+        public short Type { get; set; }
+        public DateTime Date { get; set; }
 
-        public virtual ICollection<Tower> Tower { get; set; }
+        public virtual ICollection<Tower> TowerLevel { get; set; }
+        public virtual ICollection<Tower> TowerWeight { get; set; }
     }
 }
