@@ -14,22 +14,27 @@ namespace SiloTower.Domain.Silo
         /// <summary>
         /// id башни
         /// </summary>
-        public int TowerId { get; }
+        public int TowerId { get; private set; }
         
         /// <summary>
         /// масса силоса
         /// </summary>
-        public Indicator Weight { get; }
-        
+        public Indicator Weight { get; private set; }
+
         /// <summary>
         /// уроверь силоса
         /// </summary>
-        public Indicator Level { get; }
+        public Indicator Level { get; private set; }
 
-        public SiloIndicators(int towerId, Indicator weight, Indicator level)
+        public void AddWeight(int towerId, Indicator weight)
         {
             TowerId = towerId;
             Weight = weight;
+        }
+
+        public void AddLevel(int towerId, Indicator level)
+        {
+            TowerId = towerId;
             Level = level;
         }
     }

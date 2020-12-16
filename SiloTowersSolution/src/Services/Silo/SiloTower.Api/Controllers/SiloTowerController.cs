@@ -33,7 +33,7 @@ namespace SiloTower.Api.Controllers
             {
                 _logger.Debug("GetSiloIndicators start");
                 var res = await _siloTowerValues.GetSiloIndicators();
-                if (res is not null && res.Count > 0)
+                if (res.Count > 0)
                     return Ok(res);
                 return NotFound("Значений не найдено");
             }
