@@ -9,4 +9,6 @@ class Indicator {
      public minValue: number;
      public maxValue: number;
 }
-Предоставить пользователю возможность выполнять CRUD операции с индикаторами. Поле value – заполняется случайно. 
+Предоставить пользователю возможность выполнять CRUD операции с индикаторами. 
+
+https://docs.microsoft.com/ru-ru/dotnet/architecture/microservices/multi-container-microservice-net-applications/data-driven-crud-microservice
