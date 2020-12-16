@@ -24,4 +24,11 @@
 	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.6.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SeedWork\Common\Common.csproj" />
+    <ProjectReference Include="..\SiloTower.Domain\SiloTower.Domain.csproj" />
+    <ProjectReference Include="..\SiloTower.Infrastructure\SiloTower.Infrastructure.csproj" />
+    <ProjectReference Include="..\SiloTower.Interfaces\SiloTower.Interfaces.csproj" />
+  </ItemGroup>
+
 </Project>
