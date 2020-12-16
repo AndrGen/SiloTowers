@@ -45,19 +45,21 @@ namespace SiloTower.Api.Implementations
 
         public async Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest)
         {
-            IndicatorUnitOfWork unitOfWork = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
-            try
-            {
+            using IndicatorUnitOfWork unitOfWork = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
 
+            var resLevel = await unitOfWork.IndicatorValuesRepository.Entities
+                .Include(t => t.TowerLevel)
+                .Where(l => l.Type == (short)SiloIndicatorType.Level && l.TowerLevel.FirstOrDefault().Id == saveSiloIndicatorRequest.TowerId)
+                .OrderByDescending(o => o.Date)
+                .ToListAsync();
+            var resWeight = await unitOfWork.IndicatorValuesRepository.Entities
+                .Include(t => t.TowerWeight)
+                .Where(l => l.Type == (short)SiloIndicatorType.Weight && l.TowerWeight.FirstOrDefault().Id == saveSiloIndicatorRequest.TowerId)
+                .OrderByDescending(o => o.Date)
+                .ToListAsync();
 
-
-                await unitOfWork.SaveCommitAsync();
-                return await Task.FromResult(true);
-            }
-            finally
-            {
-                unitOfWork.Dispose();
-            }
+            await unitOfWork.SaveCommitAsync();
+            return await Task.FromResult(true);
         }
     }
 }
