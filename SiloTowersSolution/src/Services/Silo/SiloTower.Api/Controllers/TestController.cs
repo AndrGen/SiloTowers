@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace SiloTower.Api.Controllers
 {
     [Route("")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class TestController : Controller
     {
         private readonly ILogger _logger = LoggerHelper.Logger;

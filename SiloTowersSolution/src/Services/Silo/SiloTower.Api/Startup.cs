@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SiloTower.Api.Implementations;
+using SiloTower.Interfaces.Silo;
 
 [assembly: ApiController]
 namespace SiloTower.Api
@@ -29,6 +31,11 @@ namespace SiloTower.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SiloTowers", Version = "v1" });
             });
+
+            if (_env.IsDevelopment())
+            {
+                services.AddTransient<ISiloTowerValues, SiloTowerValuesImpl>();
+            }
 
             services.AddHealthChecks();
             services.AddMvc().AddNewtonsoftJson();
