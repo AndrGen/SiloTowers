@@ -9,7 +9,8 @@ using ILogger = Serilog.ILogger;
 
 namespace Common.Helper
 {
-    public static class LoggerHelper
+    [Obsolete("Только для хелперов")]
+    internal static class LoggerHelper
     {
         private static readonly LoggerConfiguration LoggerConfiguration;
 
@@ -20,7 +21,7 @@ namespace Common.Helper
             LoggerConfiguration = new LoggerConfiguration();
         }
 
-        public static ILogger Logger { get; private set; }
+        internal static ILogger Logger { get; private set; }
 
 
         public static void ConfigureLogging()

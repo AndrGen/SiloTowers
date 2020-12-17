@@ -1,14 +1,12 @@
-﻿using Common.Helper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using SiloTower.Domain.Silo;
 using SiloTower.Interfaces.Silo;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -18,11 +16,12 @@ namespace SiloTower.Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class SiloTowerController : Controller
     {
-        private readonly ILogger _logger = LoggerHelper.Logger;
+        private readonly ILogger<SiloTowerController> _logger;
         private readonly ISiloTowerValues _siloTowerValues;
 
-        public SiloTowerController(ISiloTowerValues siloTowerValues)
+        public SiloTowerController(ISiloTowerValues siloTowerValues, ILogger<SiloTowerController>? logger)
         {
+            _logger = logger;
             _siloTowerValues = siloTowerValues ?? throw new ArgumentNullException(nameof(siloTowerValues));
         }
 
@@ -36,7 +35,7 @@ namespace SiloTower.Api.Controllers
         {
             try
             {
-                _logger.Debug("GetSiloIndicators start");
+                _logger.LogDebug("GetSiloIndicators start");
                 var res = await _siloTowerValues.GetSiloIndicators();
                 if (res.Count > 0)
                     return Ok(res);
@@ -46,7 +45,7 @@ namespace SiloTower.Api.Controllers
             (ex is ArgumentNullException ||
              ex is InvalidOperationException)
             {
-                _logger.Error("GetSiloIndicators ", ex, ex.Message);
+                _logger.LogError("GetSiloIndicators ", ex, ex.Message);
                 return Problem(
                     statusCode: (int)HttpStatusCode.InternalServerError,
                     detail: ex.StackTrace,
@@ -64,7 +63,7 @@ namespace SiloTower.Api.Controllers
         {
             try
             {
-                _logger.Debug("SaveSiloIndicators start");
+                _logger.LogDebug("SaveSiloIndicators start");
 
                 if (await _siloTowerValues.SaveSiloIndicators(saveSiloIndicatorRequest))
                     return NoContent();
@@ -74,7 +73,7 @@ namespace SiloTower.Api.Controllers
             (ex is ArgumentNullException ||
              ex is InvalidOperationException)
             {
-                _logger.Error("SaveSiloIndicators ", ex, ex.Message);
+                _logger.LogError("SaveSiloIndicators ", ex, ex.Message);
                 return Problem(
                     statusCode: (int)HttpStatusCode.InternalServerError,
                     detail: ex.StackTrace,

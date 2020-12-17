@@ -1,20 +1,20 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
-using Common.Helper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace SiloTower.Api.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ErrorController : Controller
     {
-        private readonly ILogger _logger = LoggerHelper.Logger;
+        private readonly ILogger<ErrorController> _logger;
+
+        public ErrorController(ILogger<ErrorController>? logger)
+        {
+            _logger = logger;
+        }
 
         [Route("/error")]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
@@ -22,7 +22,7 @@ namespace SiloTower.Api.Controllers
         {
             var context = HttpContext.Features.Get<IExceptionHandlerFeature>();
 
-            _logger.Fatal($"ErrorController fatal error: {context.Error.Message} \n {context.Error.StackTrace}");
+            _logger.LogCritical($"ErrorController fatal error: {context.Error.Message} \n {context.Error.StackTrace}");
             
             return Problem(
                 statusCode: (int)HttpStatusCode.BadGateway,

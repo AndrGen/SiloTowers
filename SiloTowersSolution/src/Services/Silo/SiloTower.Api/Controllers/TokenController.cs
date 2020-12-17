@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,12 +18,13 @@ namespace SiloTower.Api.Controllers
     [Route("connect")]
     public class TokenController : Controller
     {
-        private readonly ILogger _logger = LoggerHelper.Logger;
+        private readonly ILogger<TokenController> _logger;
         private readonly IConfiguration _config;
 
-        public TokenController(IConfiguration configuration)
+        public TokenController(IConfiguration configuration, ILogger<TokenController>? logger)
         {
             _config = configuration;
+            _logger = logger;
         }
 
         [AllowAnonymous]
@@ -31,6 +32,7 @@ namespace SiloTower.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult GenerateToken([FromQuery] string publicPass)
         {
+            _logger.LogDebug("GenerateToken start");
             //MyPassw0rd
             if (Md5Helper.CreateMD5(publicPass) != _config["PublicPass"])
                 return BadRequest("Неверный пароль");

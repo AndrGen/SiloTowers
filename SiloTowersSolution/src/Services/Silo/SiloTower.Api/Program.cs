@@ -28,12 +28,11 @@ namespace SiloTower.Api
                .UseContentRoot(Directory.GetCurrentDirectory())
                .ConfigureAppConfiguration((hostingContext, config) =>
                {
-                    config.AddJsonFile("appsettings.json", false, true);
+                   config.AddJsonFile("appsettings.json", false, true);
                })
-               .UseSerilog((_, _) =>
+               .UseSerilog((hostingContext, loggerConfiguration) =>
                {
-                   LoggerHelper.ConfigureLogging();
-               })
-            ;
+                   loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
+               });
     }
 }
