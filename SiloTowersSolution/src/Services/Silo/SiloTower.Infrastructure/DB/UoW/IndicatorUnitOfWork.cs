@@ -1,7 +1,7 @@
-﻿using System.Data;
-using SiloTower.Domain.DB;
+﻿using SiloTower.Domain.DB;
 using SiloTower.Infrastructure.DB;
 using SiloTower.Interfaces.DB;
+using System.Data;
 
 namespace SiloTower.Infrastructure.UoW
 {
