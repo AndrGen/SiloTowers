@@ -30,12 +30,12 @@ namespace SiloTower.Api.Implementations
         }
         public async Task<IDictionary<int, SiloIndicators>> GetSiloIndicators()
         {
-            using var unitOfWork = _factory.Create<SelectTowersUnitOfWork>();
-            var result = await unitOfWork.TowerRepository.Entities.Include(l => l.Level).Include(w => w.Weight).Where(s => s.LevelId != null && s.WeightId != null).ToListAsync();
-
+            using var unitOfWork = _factory.Create<SiloTowerUnitOfWork>();
+            var towerRepository = unitOfWork.TowerRepository;
+                       
             IDictionary<int, SiloIndicators> siloIndicators = new Dictionary<int, SiloIndicators>();
 
-            foreach (var res in result)
+           foreach (var res in towerRepository.GetSiloIndicators())
             {
                 siloIndicators.Add(
                     res.Id,
@@ -51,18 +51,11 @@ namespace SiloTower.Api.Implementations
 
         public async Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest)
         {
-            using IndicatorUnitOfWork unitOfWork = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
+            using SiloTowerUnitOfWork unitOfWork = _factory.Create<SiloTowerUnitOfWork>(IsolationLevel.ReadCommitted);
+            var indicatorValuesRepository = unitOfWork.IndicatorValuesRepository;
 
-            var resLevel = await unitOfWork.IndicatorValuesRepository.Entities
-                .Include(t => t.TowerLevel)
-                .Where(l => l.Type == (short)SiloIndicatorType.Level && l.TowerLevel.FirstOrDefault().Id == saveSiloIndicatorRequest.TowerId)
-                .OrderByDescending(o => o.Date)
-                .FirstOrDefaultAsync();
-            var resWeight = await unitOfWork.IndicatorValuesRepository.Entities
-                .Include(t => t.TowerWeight)
-                .Where(l => l.Type == (short)SiloIndicatorType.Weight && l.TowerWeight.FirstOrDefault().Id == saveSiloIndicatorRequest.TowerId)
-                .OrderByDescending(o => o.Date)
-                .FirstOrDefaultAsync();
+            var resLevel = await indicatorValuesRepository.GetLevelIndicators(saveSiloIndicatorRequest.TowerId);
+            var resWeight = await indicatorValuesRepository.GetWeightIndicators(saveSiloIndicatorRequest.TowerId);
 
             if (resLevel is not null && resWeight is not null)
             {
@@ -75,7 +68,7 @@ namespace SiloTower.Api.Implementations
                     MinValue = resLevel.MinValue,
                     Date = DateTime.Now,
                 };
-                unitOfWork.IndicatorValuesRepository.Add(indicatorLevel);
+                indicatorValuesRepository.Add(indicatorLevel);
 
                 IndicatorValues indicatorWeight = new IndicatorValues
                 {
@@ -86,21 +79,19 @@ namespace SiloTower.Api.Implementations
                     MinValue = resWeight.MinValue,
                     Date = DateTime.Now,
                 };
-                unitOfWork.IndicatorValuesRepository.Add(indicatorWeight);
+                indicatorValuesRepository.Add(indicatorWeight);
 
                 await unitOfWork.SaveCommitAsync();
             }
 
-            using IndicatorUnitOfWork unitOfWorkTower = _factory.Create<IndicatorUnitOfWork>(IsolationLevel.ReadCommitted);
-            var tower = await unitOfWorkTower.TowerRepository.GetAsyncById(saveSiloIndicatorRequest.TowerId);
-            var weight = await unitOfWorkTower.IndicatorValuesRepository.Entities
-                .Where(l => l.Type == (short)SiloIndicatorType.Weight)
-                .OrderByDescending(o => o.Date)
-                .FirstOrDefaultAsync();
-            var level = await unitOfWorkTower.IndicatorValuesRepository.Entities
-                .Where(l => l.Type == (short)SiloIndicatorType.Level)
-                .OrderByDescending(o => o.Date)
-                .FirstOrDefaultAsync();
+            using SiloTowerUnitOfWork unitOfWorkTower = _factory.Create<SiloTowerUnitOfWork>(IsolationLevel.ReadCommitted);
+            var towerValuesRepository = unitOfWork.TowerRepository;
+            var indicatorValuesRepositoryAfterInsert = unitOfWork.IndicatorValuesRepository;
+            
+            var tower = await towerValuesRepository.GetAsyncById(saveSiloIndicatorRequest.TowerId);
+
+            var weight = await indicatorValuesRepositoryAfterInsert.GetWeightIndicators();
+            var level = await indicatorValuesRepositoryAfterInsert.GetLevelIndicators();
             tower.LevelId = level.Id;
             tower.WeightId = weight.Id;
 
