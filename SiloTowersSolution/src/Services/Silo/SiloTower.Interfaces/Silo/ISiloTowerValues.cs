@@ -9,7 +9,7 @@ namespace SiloTower.Interfaces.Silo
 {
     public interface ISiloTowerValues
     {
-        public Task<IList<SiloIndicators>> GetSiloIndicators();
+        public Task<IDictionary<int, SiloIndicators>> GetSiloIndicators();
 
         public Task<bool> SaveSiloIndicators(SaveSiloIndicatorRequest saveSiloIndicatorRequest);
     }

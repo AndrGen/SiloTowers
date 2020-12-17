@@ -59,7 +59,7 @@ namespace SiloTower.Api
                      options.UseSqlServer(new DbConnectionString().GetDbConnectionString());
                  },
                  ServiceLifetime.Singleton);
-                services.AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SilotowerContext>();
+                //services.AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SilotowerContext>();
                 services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             }
 

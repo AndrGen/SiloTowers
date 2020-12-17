@@ -29,8 +29,9 @@ namespace SiloTower.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<IList<SiloIndicators>>> GetSiloIndicators()
+        public async Task<ActionResult<IDictionary<int, SiloIndicators>>> GetSiloIndicators()
         {
             try
             {
@@ -54,6 +55,7 @@ namespace SiloTower.Api.Controllers
 
         [HttpPost("SaveIndicator")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
