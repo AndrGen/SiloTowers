@@ -4,14 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
+using SiloTower.Interfaces.Auth;
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SiloTower.Api.Controllers
 {
@@ -20,41 +14,28 @@ namespace SiloTower.Api.Controllers
     {
         private readonly ILogger<TokenController> _logger;
         private readonly IConfiguration _config;
+        private readonly IToken _token;
 
-        public TokenController(IConfiguration configuration, ILogger<TokenController>? logger)
+        public TokenController(IConfiguration configuration, ILogger<TokenController> logger, IToken token)
         {
             _config = configuration;
             _logger = logger;
+            _token = token ?? throw new ArgumentNullException(nameof(token));
         }
 
         [AllowAnonymous]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult GenerateToken([FromQuery] string publicPass)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public IActionResult GenerateToken([FromBody] string publicPass)
         {
             _logger.LogDebug("GenerateToken start");
             //MyPassw0rd
             if (Md5Helper.CreateMD5(publicPass) != _config["PublicPass"])
                 return BadRequest("Неверный пароль");
-            
-            var claims = new[]
-            {
-              new Claim(JwtRegisteredClaimNames.Sub, "user"),
-              new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Tokens:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(_config["Tokens:Issuer"],
-              _config["Tokens:Issuer"],
-              claims,
-              expires: DateTime.Now.AddMinutes(30),
-              signingCredentials: creds);
-
-            return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+            return CreatedAtAction(nameof(GenerateToken), _token.GenerateToken());
         }
-
     }
 }
-    
+

@@ -1,10 +1,8 @@
 using HealthChecks.UI.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,11 +16,10 @@ using Polly.Extensions.Http;
 using SiloTower.Api.Auth;
 using SiloTower.Api.Implementations;
 using SiloTower.Infrastructure.DB;
+using SiloTower.Interfaces.Auth;
 using SiloTower.Interfaces.DB;
 using SiloTower.Interfaces.Silo;
 using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Text;
 
@@ -56,6 +53,7 @@ namespace SiloTower.Api
             if (_env.IsDevelopment())
             {
                 services.AddTransient<ISiloTowerValues, SiloTowerValuesImpl>();
+                services.AddTransient<IToken, TokenImpl>();
                 services.AddHttpClient<INotifyClient, NotifyClientImpl>()
                     .AddPolicyHandler(GetRetryPolicy())
                     .AddPolicyHandler(GetCircuitBreakerPolicy());
@@ -66,7 +64,6 @@ namespace SiloTower.Api
                      options.UseSqlServer(new DbConnectionString().GetDbConnectionString());
                  },
                  ServiceLifetime.Singleton);
-                //services.AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SilotowerContext>();
                 services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             }
             services.AddCors(options =>
