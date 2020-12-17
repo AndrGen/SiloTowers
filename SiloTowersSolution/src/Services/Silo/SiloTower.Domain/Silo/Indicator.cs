@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SiloTower.Domain.Silo
 {
@@ -39,6 +35,13 @@ namespace SiloTower.Domain.Silo
 
         public Indicator(string id, string title, decimal value, decimal minValue, decimal maxValue)
         {
+            if (id is null) throw new ArgumentNullException(nameof(id));
+            if (title is null) throw new ArgumentNullException(nameof(title));
+            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+            if (minValue < 0) throw new ArgumentOutOfRangeException(nameof(minValue));
+            if (maxValue < 0) throw new ArgumentOutOfRangeException(nameof(maxValue));
+            if (maxValue - minValue < 0) throw new InvalidOperationException("MaxValue должно быть больше MinValue");
+
             Id = id;
             Title = title;
             Value = value;

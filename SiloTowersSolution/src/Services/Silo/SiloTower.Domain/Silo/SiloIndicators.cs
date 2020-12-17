@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SiloTower.Domain.Silo
 {
@@ -28,18 +24,24 @@ namespace SiloTower.Domain.Silo
 
         public SiloIndicators AddId(int towerId)
         {
+            if (towerId < 0) throw new ArgumentOutOfRangeException(nameof(towerId));
+            
             TowerId = towerId;
             return this;
         }
 
         public SiloIndicators AddWeight(Indicator weight)
         {
+            if (weight is null) throw new ArgumentNullException(nameof(weight));
+
             Weight = weight;
             return this;
         }
 
         public SiloIndicators AddLevel(Indicator level)
         {
+            if (level is null) throw new ArgumentNullException(nameof(level));
+
             Level = level;
             return this;
         }

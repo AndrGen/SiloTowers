@@ -43,6 +43,7 @@ namespace SiloTower.Api.Controllers
             }
             catch (Exception ex) when
             (ex is ArgumentNullException ||
+            ex is ArgumentOutOfRangeException ||
              ex is InvalidOperationException)
             {
                 _logger.LogError("GetSiloIndicators ", ex, ex.Message);
@@ -63,6 +64,11 @@ namespace SiloTower.Api.Controllers
         {
             try
             {
+                if (saveSiloIndicatorRequest is null) throw new ArgumentNullException(nameof(saveSiloIndicatorRequest));
+                if (saveSiloIndicatorRequest.TowerId < 1) throw new ArgumentOutOfRangeException(nameof(saveSiloIndicatorRequest.TowerId));
+                if (saveSiloIndicatorRequest.LevelValue < 0) throw new ArgumentOutOfRangeException(nameof(saveSiloIndicatorRequest.LevelValue));
+                if (saveSiloIndicatorRequest.WeightValue < 0) throw new ArgumentOutOfRangeException(nameof(saveSiloIndicatorRequest.WeightValue));
+
                 _logger.LogDebug("SaveSiloIndicators start");
 
                 if (await _siloTowerValues.SaveSiloIndicators(saveSiloIndicatorRequest))
@@ -71,6 +77,7 @@ namespace SiloTower.Api.Controllers
             }
             catch (Exception ex) when
             (ex is ArgumentNullException ||
+            ex is ArgumentOutOfRangeException ||
              ex is InvalidOperationException)
             {
                 _logger.LogError("SaveSiloIndicators ", ex, ex.Message);
