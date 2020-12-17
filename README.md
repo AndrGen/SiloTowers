@@ -11,7 +11,7 @@ _Модель индикатора:_
 }`
 Предоставить пользователю возможность выполнять CRUD операции с индикаторами. 
 
-![Towers](Silo towers1.png)
+![Towers](/Silo towers1.png)
 Format: ![Alt Text](url)
 
 
