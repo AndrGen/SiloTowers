@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\SeedWork\Common\Common.csproj" />
     <ProjectReference Include="..\..\SiloTower.Api\SiloTower.Api.csproj" />
     <ProjectReference Include="..\..\SiloTower.Interfaces\SiloTower.Interfaces.csproj" />
   </ItemGroup>
