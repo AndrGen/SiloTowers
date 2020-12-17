@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Text;
 
 [assembly: ApiController]
 namespace SiloTower.Api
@@ -48,23 +49,7 @@ namespace SiloTower.Api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SiloTowers", Version = "v1" });
-                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-                {
-                    Type = SecuritySchemeType.OAuth2,
-                    Flows = new OpenApiOAuthFlows()
-                    {
-                        Implicit = new OpenApiOAuthFlow()
-                        {
-                            AuthorizationUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrl")}/connect/authorize"),
-                            TokenUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrl")}/connect/token"),
-                            Scopes = new Dictionary<string, string>()
-                            {
-                                { "tower", "Tower API" }
-                            }
-                        }
-                    }
-                });
-
+             
                 c.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
@@ -112,7 +97,7 @@ namespace SiloTower.Api
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "SiloTowers v1");
-                c.OAuthClientId("towerswaggerui");
+                c.OAuthClientId("api");
                 c.OAuthAppName("Tower Swagger UI");
             });
             app.UseCors("CorsPolicy");
@@ -169,8 +154,6 @@ namespace SiloTower.Api
 
         static void AddCustomAuthentication(IServiceCollection services, IConfiguration configuration)
         {
-            // prevent from mapping "sub" claim to nameidentifier.
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
 
             var identityUrl = configuration.GetValue<string>("IdentityUrl");
 
@@ -181,9 +164,16 @@ namespace SiloTower.Api
 
             }).AddJwtBearer(options =>
             {
-                options.Authority = identityUrl;
                 options.RequireHttpsMetadata = false;
-                options.Audience = "tower";
+
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidIssuer = configuration["Tokens:Issuer"],
+                    ValidAudience = configuration["Tokens:Issuer"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Tokens:Key"]))
+                };
             });
 
         }

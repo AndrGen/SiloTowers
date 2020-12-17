@@ -28,7 +28,7 @@ namespace SiloTower.Api.Auth
                 {
                     new OpenApiSecurityRequirement
                     {
-                        [ oAuthScheme ] = new [] { "towerapi" }
+                        [ oAuthScheme ] = new [] { "spi" }
                     }
                 };
         }

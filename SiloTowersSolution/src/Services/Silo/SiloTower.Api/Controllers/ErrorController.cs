@@ -26,7 +26,7 @@ namespace SiloTower.Api.Controllers
             
             return Problem(
                 statusCode: (int)HttpStatusCode.BadGateway,
-                detail: context.Error.StackTrace,
+                detail: context.Error.Message + " || " + context.Error.StackTrace,
                 title: context.Error.Message);
         }
     }
