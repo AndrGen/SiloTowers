@@ -16,7 +16,7 @@ namespace SiloTower.Api.Controllers
         private readonly IConfiguration _config;
         private readonly IToken _token;
 
-        public TokenController(IConfiguration configuration, ILogger<TokenController> logger, IToken token)
+        public TokenController(IConfiguration configuration, ILogger<TokenController>? logger, IToken token)
         {
             _config = configuration;
             _logger = logger;
@@ -29,7 +29,7 @@ namespace SiloTower.Api.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public IActionResult GenerateToken([FromBody] string publicPass)
         {
-            _logger.LogDebug("GenerateToken start");
+            _logger?.LogDebug("GenerateToken start");
             //MyPassw0rd
             if (Md5Helper.CreateMD5(publicPass) != _config["PublicPass"])
                 return BadRequest("Неверный пароль");
