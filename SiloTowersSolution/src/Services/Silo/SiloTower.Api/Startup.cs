@@ -10,11 +10,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Polly;
+using Polly.Extensions.Http;
 using SiloTower.Api.Implementations;
 using SiloTower.Infrastructure.DB;
 using SiloTower.Interfaces.DB;
 using SiloTower.Interfaces.Silo;
 using System;
+using System.Net.Http;
 
 [assembly: ApiController]
 namespace SiloTower.Api
@@ -46,6 +49,10 @@ namespace SiloTower.Api
             if (_env.IsDevelopment())
             {
                 services.AddTransient<ISiloTowerValues, SiloTowerValuesImpl>();
+                services.AddHttpClient<INotifyClient, NotifyClientImpl>()
+                    .AddPolicyHandler(GetRetryPolicy())
+                    .AddPolicyHandler(GetCircuitBreakerPolicy());
+
                 services.AddDbContext<SilotowerContext>(
                  options =>
                  {
@@ -97,6 +104,20 @@ namespace SiloTower.Api
                 endpoints.MapControllers();
                 endpoints.MapHealthChecks("/hc");
             });
+        }
+
+        static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                .WaitAndRetryAsync(6, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+        }
+        static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+        {
+            return HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
         }
     }
 }
