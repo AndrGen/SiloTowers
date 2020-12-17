@@ -1,22 +1,28 @@
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Polly;
 using Polly.Extensions.Http;
+using SiloTower.Api.Auth;
 using SiloTower.Api.Implementations;
 using SiloTower.Infrastructure.DB;
 using SiloTower.Interfaces.DB;
 using SiloTower.Interfaces.Silo;
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 
 [assembly: ApiController]
@@ -37,13 +43,29 @@ namespace SiloTower.Api
         public void ConfigureServices(IServiceCollection services)
         {
             var identityUrl = Configuration.GetValue<string>("IdentityUrl");
-            var callBackUrl = Configuration.GetValue<string>("CallBackUrl");
-            var sessionCookieLifetime = Configuration.GetValue("SessionCookieLifetimeMinutes", 60);
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SiloTowers", Version = "v1" });
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows()
+                    {
+                        Implicit = new OpenApiOAuthFlow()
+                        {
+                            AuthorizationUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrl")}/connect/authorize"),
+                            TokenUrl = new Uri($"{Configuration.GetValue<string>("IdentityUrl")}/connect/token"),
+                            Scopes = new Dictionary<string, string>()
+                            {
+                                { "tower", "Tower API" }
+                            }
+                        }
+                    }
+                });
+
+                c.OperationFilter<AuthorizeCheckOperationFilter>();
             });
 
             if (_env.IsDevelopment())
@@ -62,23 +84,20 @@ namespace SiloTower.Api
                 //services.AddIdentityCore<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SilotowerContext>();
                 services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
             }
-
-            services.AddHealthChecks();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder
+                    .SetIsOriginAllowed((host) => true)
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+            });
+            AddCustomHealthChecks(services);
             services.AddMvc().AddNewtonsoftJson();
 
             // Add Authentication services
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-            }).AddJwtBearer(options =>
-            {
-                options.Authority = identityUrl;
-                options.RequireHttpsMetadata = false;
-                options.Audience = "orders";
-            });
+            AddCustomAuthentication(services, Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,7 +109,13 @@ namespace SiloTower.Api
             }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SiloTowers v1"));
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "SiloTowers v1");
+                c.OAuthClientId("towerswaggerui");
+                c.OAuthAppName("Tower Swagger UI");
+            });
+            app.UseCors("CorsPolicy");
 
             app.UseExceptionHandler("/error");
 
@@ -102,7 +127,15 @@ namespace SiloTower.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/hc");
+                endpoints.MapHealthChecks("/hc", new HealthCheckOptions()
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+                endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
+                {
+                    Predicate = r => r.Name.Contains("self")
+                });
             });
         }
 
@@ -119,5 +152,41 @@ namespace SiloTower.Api
                 .HandleTransientHttpError()
                 .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
         }
+
+        static void AddCustomHealthChecks(IServiceCollection services)
+        {
+            var hcBuilder = services.AddHealthChecks();
+
+            hcBuilder.AddCheck("self", () => HealthCheckResult.Healthy());
+
+            hcBuilder
+                .AddSqlServer(
+                    new DbConnectionString().GetDbConnectionString(),
+                    name: "TowerDB-check",
+                    tags: new string[] { "towerdb" });
+
+        }
+
+        static void AddCustomAuthentication(IServiceCollection services, IConfiguration configuration)
+        {
+            // prevent from mapping "sub" claim to nameidentifier.
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
+
+            var identityUrl = configuration.GetValue<string>("IdentityUrl");
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = identityUrl;
+                options.RequireHttpsMetadata = false;
+                options.Audience = "tower";
+            });
+
+        }
     }
+
 }
